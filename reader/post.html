@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Odin Journal | Article</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="navbar">
+      <a class="logo" href="index.html">Odin Journal.</a>
+      <a href="index.html">← All articles</a>
+    </header>
+
+    <main class="container article-container">
+      <article id="article">
+        <p>Loading article...</p>
+      </article>
+
+      <section class="comments-section">
+        <h2>Conversation</h2>
+        <div id="comments">
+          <p>Loading comments...</p>
+        </div>
+
+        <form id="comment-form" class="comment-form">
+          <h3>Leave a comment</h3>
+          <textarea
+            name="body"
+            rows="5"
+            maxlength="5000"
+            placeholder="Share your thoughts..."
+            required
+          ></textarea>
+          <button type="submit">Submit comment</button>
+          <p id="comment-message"></p>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 Odin Journal.</p>
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>

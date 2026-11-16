@@ -1,0 +1,92 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Odin Journal administration dashboard." />
+  <title>Odin Journal | Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <a class="logo" href="../reader/index.html">Odin Journal.</a>
+    <div class="nav-actions">
+      <a href="../reader/index.html">View website</a>
+      <button id="logout-button" class="secondary hidden" type="button">Log out</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="login-section" class="login-section">
+      <p class="eyebrow">ADMINISTRATION</p>
+      <h1>Admin sign in</h1>
+      <p>Sign in with your administrator account to manage the blog.</p>
+      <form id="login-form" class="panel login-form">
+        <label for="identifier">Email or username</label>
+        <input id="identifier" name="identifier" autocomplete="username" required />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+        <button type="submit">Sign in</button>
+        <p id="login-message" class="message" role="status"></p>
+      </form>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">CONTROL PANEL</p>
+          <h1>Blog dashboard</h1>
+          <p id="welcome-message"></p>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">CONTENT</p>
+            <h2 id="post-form-title">Create an article</h2>
+          </div>
+        </div>
+        <form id="post-form">
+          <label for="post-title">Article title</label>
+          <input id="post-title" name="title" maxlength="180" required />
+          <label for="post-excerpt">Short excerpt (optional)</label>
+          <textarea id="post-excerpt" name="excerpt" rows="2" maxlength="300"></textarea>
+          <label for="post-content">Article content</label>
+          <textarea id="post-content" name="content" rows="10" required></textarea>
+          <div class="form-actions">
+            <button id="save-post-button" type="submit">Create draft</button>
+            <button id="cancel-edit-button" class="secondary hidden" type="button">Cancel edit</button>
+          </div>
+          <p id="post-message" class="message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">YOUR CONTENT</p>
+            <h2>Manage articles</h2>
+          </div>
+          <button id="refresh-posts-button" class="secondary" type="button">Refresh</button>
+        </div>
+        <div id="posts-list" class="items-list">Loading articles...</div>
+      </section>
+
+      <section class="panel">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">COMMUNITY</p>
+            <h2>Comment moderation</h2>
+          </div>
+          <button id="refresh-comments-button" class="secondary" type="button">Refresh</button>
+        </div>
+        <div id="comments-list" class="items-list">Loading comments...</div>
+      </section>
+    </section>
+  </main>
+
+  <footer><p>Odin Journal administration</p></footer>
+  <script src="app.js"></script>
+</body>
+</html>

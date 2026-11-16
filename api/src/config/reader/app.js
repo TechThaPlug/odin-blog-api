@@ -1,0 +1,273 @@
+const API_URL = "http://localhost:3000/api";
+
+const getToken = () => localStorage.getItem("blogToken");
+
+async function apiRequest(endpoint, options = {}) {
+  const headers = {
+    ...(options.body ? { "Content-Type": "application/json" } : {}),
+    ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+    ...options.headers,
+  };
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || "Something went wrong.");
+  }
+
+  return result;
+}
+
+function showMessage(element, message, isError = false) {
+  if (!element) return;
+
+  element.textContent = message;
+  element.style.color = isError ? "#b42318" : "#416b58";
+}
+
+// Load published articles.
+async function loadPosts() {
+  const container = document.getElementById("posts");
+  if (!container) return;
+
+  try {
+    const result = await apiRequest("/posts");
+    const posts = Array.isArray(result.data) ? result.data : [];
+
+    container.replaceChildren();
+
+    if (!posts.length) {
+      container.textContent = "No published articles yet.";
+      return;
+    }
+
+    posts.forEach((post) => {
+      const card = document.createElement("article");
+      card.className = "post-card";
+
+      const title = document.createElement("h3");
+      title.textContent = post.title;
+
+      const excerpt = document.createElement("p");
+      excerpt.textContent = post.excerpt || "Read this article.";
+
+      const link = document.createElement("a");
+      link.href = `post.html?slug=${encodeURIComponent(post.slug)}`;
+      link.textContent = "Read article →";
+
+      card.append(title, excerpt, link);
+      container.appendChild(card);
+    });
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+
+// Register a reader.
+async function registerUser(event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
+
+  try {
+    const result = await apiRequest("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    localStorage.setItem("blogToken", result.token);
+    showAuthStatus(result.user);
+    form.reset();
+
+    alert("Registration successful!");
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// Log in a reader.
+async function loginUser(event) {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const data = Object.fromEntries(new FormData(form));
+
+  try {
+    const result = await apiRequest("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    localStorage.setItem("blogToken", result.token);
+    showAuthStatus(result.user);
+    form.reset();
+
+    alert("Login successful!");
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+// Display account status.
+async function showAuthStatus(user = null) {
+  const status = document.getElementById("auth-status");
+  if (!status) return;
+
+  if (!user && getToken()) {
+    try {
+      const result = await apiRequest("/auth/me");
+      user = result.user;
+    } catch {
+      localStorage.removeItem("blogToken");
+    }
+  }
+
+  if (user) {
+    status.textContent = `Welcome, ${user.username}!`;
+
+    document.getElementById("logout-button")?.classList.remove("hidden");
+  } else {
+    status.textContent =
+      "Log in or create an account to join the conversation.";
+
+    document.getElementById("logout-button")?.classList.add("hidden");
+  }
+}
+
+// Load an individual article.
+async function loadArticle() {
+  const article = document.getElementById("article");
+  if (!article) return;
+
+  const slug = new URLSearchParams(window.location.search).get("slug");
+
+  if (!slug) {
+    article.textContent = "No article was selected.";
+    return;
+  }
+
+  try {
+    const result = await apiRequest(`/posts/${encodeURIComponent(slug)}`);
+
+    const post = result.data;
+
+    const heading = document.createElement("h1");
+    heading.textContent = post.title;
+
+    const excerpt = document.createElement("p");
+    excerpt.textContent = post.excerpt || "";
+
+    const content = document.createElement("div");
+    content.className = "article-content";
+    content.textContent = post.content;
+
+    article.replaceChildren(heading, excerpt, content);
+
+    document.title = `${post.title} | Odin Journal`;
+
+    await loadComments(post.id);
+    setupCommentForm(post.id);
+  } catch (error) {
+    article.textContent = error.message;
+  }
+}
+
+// Load approved comments.
+async function loadComments(postId) {
+  const container = document.getElementById("comments");
+  if (!container) return;
+
+  try {
+    const result = await apiRequest(`/posts/${postId}/comments`);
+
+    const comments = result.data || [];
+
+    container.replaceChildren();
+
+    if (!comments.length) {
+      container.textContent = "No comments yet. Start the conversation!";
+      return;
+    }
+
+    comments.forEach((comment) => {
+      const card = document.createElement("div");
+      card.className = "comment";
+
+      const author = document.createElement("strong");
+      author.textContent = comment.author?.username || "Reader";
+
+      const body = document.createElement("p");
+      body.textContent = comment.body;
+
+      const date = document.createElement("small");
+      date.textContent = new Date(comment.createdAt).toLocaleDateString();
+
+      card.append(author, body, date);
+      container.appendChild(card);
+    });
+  } catch (error) {
+    container.textContent = error.message;
+  }
+}
+
+// Submit a comment.
+function setupCommentForm(postId) {
+  const form = document.getElementById("comment-form");
+  if (!form) return;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!getToken()) {
+      showMessage(
+        document.getElementById("comment-message"),
+        "Please log in before commenting.",
+        true,
+      );
+      return;
+    }
+
+    const body = new FormData(form).get("body");
+
+    try {
+      const result = await apiRequest(`/posts/${postId}/comments`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+      });
+
+      showMessage(document.getElementById("comment-message"), result.message);
+
+      form.reset();
+    } catch (error) {
+      showMessage(
+        document.getElementById("comment-message"),
+        error.message,
+        true,
+      );
+    }
+  });
+}
+
+// Logout.
+document.getElementById("logout-button")?.addEventListener("click", () => {
+  localStorage.removeItem("blogToken");
+  showAuthStatus();
+});
+
+// Attach form events.
+document.getElementById("login-form")?.addEventListener("submit", loginUser);
+
+document
+  .getElementById("register-form")
+  ?.addEventListener("submit", registerUser);
+
+// Initialize the correct page.
+loadPosts();
+loadArticle();
+showAuthStatus();
