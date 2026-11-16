@@ -1,4 +1,4 @@
-ï»¿const API_URL = "http://localhost:3000/api";
+const API_URL = "https://odin-blog-api-lgkm.onrender.com/api";
 const TOKEN_KEY = "blogToken";
 
 let currentUser = null;
@@ -208,7 +208,7 @@ async function loadPosts() {
       const meta = element(
         "p",
         "item-meta",
-        `Created ${formatDate(post.createdAt)} Â· ${post._count?.comments ?? 0} comments`,
+        `Created ${formatDate(post.createdAt)} · ${post._count?.comments ?? 0} comments`,
       );
       const excerpt = element("p", "", post.excerpt || "No excerpt provided.");
       const actions = element("div", "item-actions");
@@ -298,7 +298,7 @@ async function loadComments() {
       const meta = element(
         "p",
         "item-meta",
-        `${comment.post?.title || "Article"} Â· ${formatDate(comment.createdAt)}`,
+        `${comment.post?.title || "Article"} · ${formatDate(comment.createdAt)}`,
       );
       const body = element("p", "item-content", comment.body);
       const actions = element("div", "item-actions");
@@ -357,3 +357,4 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   await verifyAdminSession();
 });
+

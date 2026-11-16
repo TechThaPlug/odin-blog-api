@@ -1,4 +1,4 @@
-﻿const API_URL = "http://localhost:3000/api";
+const API_URL = "https://odin-blog-api-lgkm.onrender.com/api";
 const TOKEN_KEY = "blogToken";
 
 const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -183,7 +183,7 @@ async function loadArticle() {
     articleContainer.replaceChildren();
 
     articleContainer.append(
-      createElement("p", "eyebrow", `BY ${post.author?.username || "AUTHOR"} · ${formatDate(post.publishedAt)}`),
+      createElement("p", "eyebrow", `BY ${post.author?.username || "AUTHOR"} � ${formatDate(post.publishedAt)}`),
       createElement("h1", "", post.title),
       createElement("p", "", post.excerpt || "")
     );
@@ -264,3 +264,4 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadPosts();
   await loadArticle();
 });
+

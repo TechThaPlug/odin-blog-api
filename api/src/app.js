@@ -7,10 +7,7 @@ const postRoutes = require("./routes/postRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 
-const {
-  notFoundHandler,
-  errorHandler,
-} = require("./middleware/errorHandler");
+const { notFoundHandler, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
 
@@ -22,6 +19,10 @@ app.use(
     origin: [
       "http://localhost:5500",
       "http://127.0.0.1:5500",
+      ...(process.env.FRONTEND_URLS || "")
+        .split(",")
+        .map((url) => url.trim())
+        .filter(Boolean),
     ],
     credentials: true,
   }),
